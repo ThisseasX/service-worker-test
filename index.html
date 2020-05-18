@@ -9,10 +9,13 @@
   <body>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').then(reg => {
-          if (reg.installing) {
-            reg.installing.onstatechange = ({ target: { state } }) => {
+        navigator.serviceWorker.register('sw.js').then((registration) => {
+          if (registration.installing) {
+            registration.installing.onstatechange = ({ target: { state } }) => {
               if (state === 'activated') {
+                // Refresh the page to see the below request succeed,
+                // as the first time it will fire and fail before the service
+                // worker gets the change to install, activate, and claim.
                 window.location.reload();
               }
             };
@@ -20,10 +23,16 @@
         });
       }
 
-      fetch('/test')
-        .then(x => x.json())
-        .then(x =>
-          document.write('<pre>' + JSON.stringify(x, null, 2) + '</pre>'),
+      fetch('https:/fakeurl.that.doesnt.exist')
+        .then((response) => response.json())
+        .then((data) =>
+          document.write('<pre>' + JSON.stringify(data, null, 2) + '</pre><br><br>'),
+        );
+
+      fetch('https://api.github.com/users/facebook')
+        .then((response) => response.json())
+        .then((data) =>
+          document.write('<pre>' + JSON.stringify(data, null, 2) + '</pre><br><br>'),
         );
     </script>
   </body>
